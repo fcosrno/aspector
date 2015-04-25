@@ -1,6 +1,7 @@
-/vendor/
-/db/data.sqlite
-/db/batch.json
-/db/format.json
-/src/application/config/aws_sdk.php
+vendor/
+db/data.sqlite
+db/batch.json
+db/format.json
+src/application/config/aws_sdk.php
+src/index.php
 .DS_Store
