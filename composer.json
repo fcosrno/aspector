@@ -1,0 +1,1 @@
+{"name": "fserrano/aspector", "require": {"intervention/image": "dev-master","aws/aws-sdk-php": "2.*"}, "authors": [{"name": "Francisco Serrano", "email": "fserrano@gmail.com"} ], "minimum-stability": "dev"}

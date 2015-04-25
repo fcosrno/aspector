@@ -1,0 +1,4 @@
+[
+	"https://s3.amazonaws.com/path/to/file.jpg",
+	"/tmp/path/to/local/file.jpg",
+]

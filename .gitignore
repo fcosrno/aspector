@@ -1,0 +1,6 @@
+/vendor/
+/db/data.sqlite
+/db/batch.json
+/db/format.json
+/src/application/config/aws_sdk.php
+.DS_Store
