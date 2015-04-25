@@ -177,16 +177,6 @@ switch (ENVIRONMENT)
  */
 	// $assign_to_config['name_of_config_item'] = 'value of config item';
 
-/*
- * --------------------------------------------------------------------
- * LOAD COMPOSER PACKAGES
- * --------------------------------------------------------------------
- *
- */
-include_once './../vendor/autoload.php';
-
-
-
 // --------------------------------------------------------------------
 // END OF USER CONFIGURABLE SETTINGS.  DO NOT EDIT BELOW THIS LINE
 // --------------------------------------------------------------------
@@ -289,6 +279,14 @@ include_once './../vendor/autoload.php';
 	}
 
 	define('VIEWPATH', $view_folder);
+
+/*
+ * --------------------------------------------------------------------
+ * LOAD COMPOSER PACKAGES
+ * --------------------------------------------------------------------
+ *
+ */
+include_once BASEPATH.'../../autoload.php';
 
 /*
  * --------------------------------------------------------------------
