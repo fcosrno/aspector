@@ -74,10 +74,6 @@ class Processor extends CI_Controller {
 	public function status()
 	{
 		$pending = $this->batch_model->count_pending();
-		echo "<pre>";
-		echo print_r($pending);
-		echo "</pre>";
-		die();
 		if($pending)echo "$pending pending".PHP_EOL;
 		else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
 	}
