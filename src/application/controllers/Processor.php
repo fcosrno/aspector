@@ -79,18 +79,14 @@ class Processor extends CI_Controller {
 			// $this->log_model->insert_unique(array('type'=>'error','message'=>'Image processing failed on '.$key,'details'=>$error));
 		}
 	}
-	public function test()
-	{
-		foreach($this->batch_model->get_pending(10) as $n){
-			$this->batch_model->mark($n['key'],'complete');
-			echo $this->db->last_query().'<br>';
-		}
-	}
 	public function status()
 	{
-		$pending = $this->batch_model->count_pending();
-		if($pending)echo "$pending pending".PHP_EOL;
-		else echo "complete".PHP_EOL;
-		// else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
+		if(!$this->db->count_all('batch'))echo "batch is empty";
+		else{
+			$pending = $this->batch_model->count_pending();
+			if($pending)echo "$pending pending".PHP_EOL;
+			else echo "complete".PHP_EOL;
+			// else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
+		}
 	}
 }
