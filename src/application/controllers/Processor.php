@@ -11,7 +11,16 @@ class Processor extends CI_Controller {
 		$this->load->config('aws_sdk');
 		$this->load->model(array('batch_model','log_model','json_model'));
 		$this->load->library(array('aws_sdk'));
-		$this->load->helper('html_helper');
+		$this->load->helper(array('html','file'));
+	}
+
+	public function init()
+	{
+		// runs migration... 
+	}
+	public function reset()
+	{
+		delete_files('./../db/data.sqlite');
 	}
 
 	public function run()
@@ -22,8 +31,8 @@ class Processor extends CI_Controller {
 		$manager = new ImageManager(array('driver' => 'imagick'));
 
 		// Process 10 oending images at a time
-		foreach($this->batch_model->get_pending(10) as $n){
-			try{
+		try{
+			foreach($this->batch_model->get_pending(10) as $n){
 				$key = $n['key'];
 				$bucket = $this->config->item('aws_bucket');
 				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$n['key'];
@@ -63,18 +72,25 @@ class Processor extends CI_Controller {
 				}
 
 				$this->batch_model->mark($key,'complete');
-			}catch (Exception $e){
-				// Log any errors
-				// $error = (string) $e;
-				// $this->log_model->insert_unique(array('type'=>'error','message'=>'Image processing failed on '.$key,'details'=>$error));
 			}
+		}catch (Exception $e){
+			// Log any errors
+			// $error = (string) $e;
+			// $this->log_model->insert_unique(array('type'=>'error','message'=>'Image processing failed on '.$key,'details'=>$error));
 		}
-		// echo 'complete';
+	}
+	public function test()
+	{
+		foreach($this->batch_model->get_pending(10) as $n){
+			$this->batch_model->mark($n['key'],'complete');
+			echo $this->db->last_query().'<br>';
+		}
 	}
 	public function status()
 	{
 		$pending = $this->batch_model->count_pending();
 		if($pending)echo "$pending pending".PHP_EOL;
-		else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
+		else echo "complete".PHP_EOL;
+		// else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
 	}
 }

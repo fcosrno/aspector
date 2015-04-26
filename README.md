@@ -36,13 +36,23 @@ Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket
 
 ### Process
 
-To run the processor just run this command. It will process 10 files at a time. Don't ask me why just yet.
+First, make sure you run init just to make the SQLite file.
 
-	php index.php processor run
+	/home/ubuntu/aspector/src/index.php processor init
+
+Then run the following. It will process 10 files at a time. Don't ask me why just yet.
+
+	/home/ubuntu/aspector/src/index.php processor run
 
 You can set up cron to run every minute:
 	
 	crontab -e
 	0 * * * * php /home/ubuntu/aspector/src/index.php processor run
+
+To check the progress:
+
+	/home/ubuntu/aspector/src/index.php processor status
+
+To reset the database you can run `reset` and then `init`.
 
 
