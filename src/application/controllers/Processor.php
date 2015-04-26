@@ -20,7 +20,7 @@ class Processor extends CI_Controller {
 	}
 	public function reset()
 	{
-		delete_files('./../db/data.sqlite');
+		$this->db->truncate('batch'); 
 	}
 
 	public function run()

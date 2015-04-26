@@ -53,6 +53,9 @@ To check the progress:
 
 	/home/ubuntu/aspector/src/index.php processor status
 
-To reset the database you can run `reset` and then `init`.
+To start over, run reset, which truncates the table then init. Alternatively you can delete the database in db/data.sqlite instead of running reset.
+
+	php /home/ubuntu/aspector/src/index.php processor reset
+	php /home/ubuntu/aspector/src/index.php processor init
 
 
