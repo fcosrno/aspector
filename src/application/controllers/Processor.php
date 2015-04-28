@@ -9,33 +9,51 @@ class Processor extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->config('aws_sdk');
-		$this->load->model(array('batch_model','log_model','json_model'));
+		$this->load->model(array('json_model'));
 		$this->load->library(array('aws_sdk'));
 		$this->load->helper(array('html','file'));
-	}
-
-	public function init()
-	{
-		// runs migration... 
+		$this->load->driver('cache', array('adapter' => 'redis'));
 	}
 	public function reset()
 	{
-		$this->db->truncate('batch'); 
+		foreach(array('queue','total','progress') as $var){
+			$this->cache->delete($var);
+		}
+	}
+
+	public function _url_exists($url)
+	{
+		$ch = curl_init($url);
+
+		curl_setopt($ch, CURLOPT_NOBODY, true);
+		curl_exec($ch);
+		$retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+		if($retcode=='200')return true;
 	}
 
 	public function run()
 	{		
-		// Save new batch images to db
-		$this->batch_model->store_pending_images($this->json_model->get_batch());
+		// Queue items from batch.json
+		if ( ! $queue = $this->cache->get('queue')){
+			$this->cache->save('queue', file_get_contents('./../db/batch.json'), 31557600 );
+			$count = count(json_decode($this->cache->get('queue')));
+			$this->cache->save('total',$count , 31557600 );
+		}else return;
 
 		$manager = new ImageManager(array('driver' => 'imagick'));
 
-		// Process 10 oending images at a time
+		// Process all queued images
 		try{
-			foreach($this->batch_model->get_pending(10) as $n){
-				$key = $n['key'];
+			foreach(json_decode($this->cache->get('queue')) as $key){
+
+				$this->cache->increment('progress');
+
 				$bucket = $this->config->item('aws_bucket');
-				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$n['key'];
+				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$key;
+
+				// If the file doesn't exists, skip to the next
+				if(!$this->_url_exists($src))continue;
 
 				foreach($this->json_model->get_formats() as $suffix=>$size){
 
@@ -51,6 +69,8 @@ class Processor extends CI_Controller {
 					
 					$filename=$suffix.'/'.$key;
 
+					echo 'Progress '.floor(($this->cache->get('progress')/$this->cache->get('total'))*100).'% : https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
+					
 					// Delete file form S3 if it already exists
 					if($this->aws_sdk->doesObjectExist($bucket,$filename)){
 						$this->aws_sdk->deleteObject(array(
@@ -70,23 +90,9 @@ class Processor extends CI_Controller {
 						))->toArray();
 					}
 				}
-
-				$this->batch_model->mark($key,'complete');
 			}
 		}catch (Exception $e){
-			// Log any errors
-			// $error = (string) $e;
-			// $this->log_model->insert_unique(array('type'=>'error','message'=>'Image processing failed on '.$key,'details'=>$error));
-		}
-	}
-	public function status()
-	{
-		if(!$this->db->count_all('batch'))echo "batch is empty";
-		else{
-			$pending = $this->batch_model->count_pending();
-			if($pending)echo "$pending pending".PHP_EOL;
-			else echo "complete".PHP_EOL;
-			// else echo "complete with ".$this->log_model->count_all()." errors".PHP_EOL;
+			echo "$e".PHP_EOL;
 		}
 	}
 }

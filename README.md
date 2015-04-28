@@ -34,28 +34,28 @@ Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket
 	
 	cp src/application/config/aws_sdk-example.php src/application/config/aws_sdk.php 
 
-### Process
+### Usage
 
-First, make sure you run init just to make the SQLite file.
-
-	/home/ubuntu/aspector/src/index.php processor init
-
-Then run the following. It will process 10 files at a time. Don't ask me why just yet.
+Run the following from the CLI to process every image.
 
 	/home/ubuntu/aspector/src/index.php processor run
 
-You can set up cron to run every minute:
-	
-	crontab -e
-	0 * * * * php /home/ubuntu/aspector/src/index.php processor run
+To reset, run the following after changing your batch file.
 
-To check the progress:
+	/home/ubuntu/aspector/src/index.php processor reset
 
-	/home/ubuntu/aspector/src/index.php processor status
+### How it works
 
-To start over, run reset, which truncates the table then init. Alternatively you can delete the database in db/data.sqlite instead of running reset.
+To be documented...
 
-	php /home/ubuntu/aspector/src/index.php processor reset
-	php /home/ubuntu/aspector/src/index.php processor init
+### Requirements
+
+All requirements will be installed when running `provision.sh`.
+
+PHP >= 5.3
+CodeIgniter
+Redis
+AWS PHP SDK
+Intervention Image
 
 
