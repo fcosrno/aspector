@@ -71,28 +71,32 @@ class Processor extends CI_Controller {
 
 					echo 'Progress '.floor(($this->cache->get('progress')/$this->cache->get('total'))*100).'% : https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
-					// Delete file form S3 if it already exists
-					if($this->aws_sdk->doesObjectExist($bucket,$filename)){
-						$this->aws_sdk->deleteObject(array(
-						    'Bucket' => $bucket,
-						    'Key' => $filename
-						));
-					}
-
-					// Upload to S3
-					if(!$this->aws_sdk->doesObjectExist($bucket,$filename)){
-						$aws_object=$this->aws_sdk->saveObject(array(
-						    'Bucket'      => $bucket,
-						    'Key'         => $filename,
-						    'ACL'		  => 'public-read',
-						    'Body'		  =>  $img->encode(null, 70),
-						    'ContentType' => 'image/jpeg'
-						))->toArray();
-					}
+					$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
 				}
 			}
 		}catch (Exception $e){
 			echo "$e".PHP_EOL;
+		}
+	}
+	public function _s3_rewrite($resource,$bucket,$filename)
+	{
+		// Delete file form S3 if it already exists
+		if($this->aws_sdk->doesObjectExist($bucket,$filename)){
+			$this->aws_sdk->deleteObject(array(
+			    'Bucket' => $bucket,
+			    'Key' => $filename
+			));
+		}
+
+		// Upload to S3
+		if(!$this->aws_sdk->doesObjectExist($bucket,$filename)){
+			$aws_object=$this->aws_sdk->saveObject(array(
+			    'Bucket'      => $bucket,
+			    'Key'         => $filename,
+			    'ACL'		  => 'public-read',
+			    'Body'		  =>  $resource,
+			    'ContentType' => 'image/jpeg'
+			))->toArray();
 		}
 	}
 }
