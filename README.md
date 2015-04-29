@@ -56,7 +56,6 @@ All requirements will be installed when running `provision.sh`.
 
 - PHP >= 5.3
 - CodeIgniter
-- Redis
 - AWS PHP SDK
 - Intervention Image
 

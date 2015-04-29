@@ -12,12 +12,12 @@ class Processor extends CI_Controller {
 		$this->load->model(array('json_model'));
 		$this->load->library(array('aws_sdk'));
 		$this->load->helper(array('html','file'));
-		$this->load->driver('cache', array('adapter' => 'redis'));
+		$this->load->driver('cache');
 	}
 	public function reset()
 	{
-		foreach(array('queue','total','progress') as $var){
-			$this->cache->delete($var);
+		foreach(array('progress') as $var){
+			$this->cache->file->delete($var);
 		}
 	}
 
@@ -34,22 +34,16 @@ class Processor extends CI_Controller {
 
 	public function run()
 	{		
-		// Queue items from batch.json
-		if (!$this->cache->get('queue')){
-			$this->cache->save('queue', file_get_contents('./../db/batch.json'), 31557600 );
-			$count = count(json_decode($this->cache->get('queue')));
-			$this->cache->save('total',$count , 31557600 );
-		};
+
+		$queue = json_decode(file_get_contents('./../db/batch.json'));
+		$queue_total = count($queue);
+		if($this->cache->file->get('progress'))$queue=array_slice($queue, $this->cache->file->get('progress'),null,true);
 		
-		$manager = new ImageManager(array('driver' => 'imagick'));
-
-		$queue = json_decode($this->cache->get('queue'));
-		if($this->cache->get('progress'))$queue=array_slice($queue, $this->cache->get('progress'),null,true);
-
 		try{
+			$manager = new ImageManager(array('driver' => 'imagick'));
 			foreach($queue as $key=>$source){
 
-				$this->cache->save('progress',$key);
+				$this->cache->file->save('progress',$key,31557600);
 
 				$bucket = $this->config->item('aws_bucket');
 				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$source;
@@ -71,7 +65,7 @@ class Processor extends CI_Controller {
 					
 					$filename=$suffix.'/'.$source;
 
-					echo 'Progress '.floor((($this->cache->get('progress')+1)/$this->cache->get('total'))*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
+					echo 'Progress '.floor((($this->cache->file->get('progress')+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
 					$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
 				}
