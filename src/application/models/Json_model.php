@@ -21,5 +21,9 @@ class Json_model extends CI_Model {
     {
         return $this->_get_json('./../db/batch.json');
     }
+    public function get_config()
+    {
+        return $this->_get_json('./../db/config.json');
+    }
 }
 ?>

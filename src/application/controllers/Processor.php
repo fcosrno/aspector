@@ -5,6 +5,8 @@ use Intervention\Image\ImageManager;
 
 class Processor extends CI_Controller {
 
+	private $overwrite;
+
 	function __construct()
 	{
 		parent::__construct();
@@ -13,6 +15,12 @@ class Processor extends CI_Controller {
 		$this->load->library(array('aws_sdk'));
 		$this->load->helper(array('html','file'));
 		$this->load->driver('cache');
+
+		// Settings
+		$config = $this->json_model->get_config();
+		foreach($this->json_model->get_config() as $key=>$value){
+			$this->{$key} = $value;
+		}
 	}
 	public function reset()
 	{
@@ -34,7 +42,6 @@ class Processor extends CI_Controller {
 
 	public function run()
 	{		
-
 		$queue = json_decode(file_get_contents('./../db/batch.json'));
 		$queue_total = count($queue);
 		if($this->cache->file->get('progress'))$queue=array_slice($queue, $this->cache->file->get('progress'),null,true);
@@ -48,10 +55,19 @@ class Processor extends CI_Controller {
 				$bucket = $this->config->item('aws_bucket');
 				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$source;
 
-				// If the file doesn't exists, skip to the next
+				// If the file doesn't exist, skip to the next
 				if(!$this->_url_exists($src))continue;
 
 				foreach($this->json_model->get_formats() as $suffix=>$size){
+					
+					$filename=$suffix.'/'.$source;
+
+					if(!$this->overwrite){
+						if($this->_url_exists('https://s3.amazonaws.com/'.$bucket.'/'.$filename)){
+							echo "File exists! Skipping ".$this->cache->file->get('progress')." of ".$queue_total.PHP_EOL;
+							continue;
+						}
+					}
 
 					// Resize with Intervention
 					if($size[0] && $size[1]){
@@ -63,7 +79,6 @@ class Processor extends CI_Controller {
 						$img = $manager->make($src)->resize($size[0],null,function ($constraint) {$constraint->aspectRatio(); });
 					}
 					
-					$filename=$suffix.'/'.$source;
 
 					echo 'Progress '.floor((($this->cache->file->get('progress')+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					

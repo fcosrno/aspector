@@ -62,7 +62,6 @@ All requirements will be installed when running `provision.sh`.
 ### Roadmap
 
 - config.json
-	- rewrite (bool)
 	- prefix or suffix (bucket/xm/file.jpg or bucket/file_xm.jpg)
 	- convert to format: jpg, png, gif, etc.
 	- optimization quality
