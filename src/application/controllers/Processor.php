@@ -35,22 +35,24 @@ class Processor extends CI_Controller {
 	public function run()
 	{		
 		// Queue items from batch.json
-		if ( ! $queue = $this->cache->get('queue')){
+		if (!$this->cache->get('queue')){
 			$this->cache->save('queue', file_get_contents('./../db/batch.json'), 31557600 );
 			$count = count(json_decode($this->cache->get('queue')));
 			$this->cache->save('total',$count , 31557600 );
-		}else return;
-
+		};
+		
 		$manager = new ImageManager(array('driver' => 'imagick'));
 
-		// Process all queued images
-		try{
-			foreach(json_decode($this->cache->get('queue')) as $key){
+		$queue = json_decode($this->cache->get('queue'));
+		if($this->cache->get('progress'))$queue=array_slice($queue, $this->cache->get('progress'),null,true);
 
-				$this->cache->increment('progress');
+		try{
+			foreach($queue as $key=>$source){
+
+				$this->cache->save('progress',$key);
 
 				$bucket = $this->config->item('aws_bucket');
-				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$key;
+				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$source;
 
 				// If the file doesn't exists, skip to the next
 				if(!$this->_url_exists($src))continue;
@@ -67,9 +69,9 @@ class Processor extends CI_Controller {
 						$img = $manager->make($src)->resize($size[0],null,function ($constraint) {$constraint->aspectRatio(); });
 					}
 					
-					$filename=$suffix.'/'.$key;
+					$filename=$suffix.'/'.$source;
 
-					echo 'Progress '.floor(($this->cache->get('progress')/$this->cache->get('total'))*100).'% : https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
+					echo 'Progress '.floor((($this->cache->get('progress')+1)/$this->cache->get('total'))*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
 					$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
 				}

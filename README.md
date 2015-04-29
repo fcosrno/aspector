@@ -44,6 +44,8 @@ To reset, run the following after changing your batch file.
 
 	/home/ubuntu/aspector/src/index.php processor reset
 
+If something goes wrong, an error will be thrown to the terminal. You an always rerun the processor and it will continue where it left off. 
+
 ### How it works
 
 To be documented...
@@ -52,10 +54,20 @@ To be documented...
 
 All requirements will be installed when running `provision.sh`.
 
-PHP >= 5.3
-CodeIgniter
-Redis
-AWS PHP SDK
-Intervention Image
+- PHP >= 5.3
+- CodeIgniter
+- Redis
+- AWS PHP SDK
+- Intervention Image
+
+### Roadmap
+
+- config.json
+	- rewrite (bool)
+	- prefix or suffix (bucket/xm/file.jpg or bucket/file_xm.jpg)
+	- convert to format: jpg, png, gif, etc.
+	- optimization quality
+- Batch from URL instead of bucket key
+- Remove CI dependency
 
 
