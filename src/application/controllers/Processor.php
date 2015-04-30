@@ -39,6 +39,12 @@ class Processor extends CI_Controller {
 		curl_close($ch);
 		if($retcode=='200')return true;
 	}
+
+	public function _is_readable_binary($url)
+	{
+		$array = @getimagesize($url);
+		if(!empty($array))return true;
+	}
 	public function _is_valid_image($url)
 	{
 		if(@exif_imagetype($url))return true;
@@ -62,7 +68,7 @@ class Processor extends CI_Controller {
 				// If the file doesn't exist or if its invalid, skip to the next
 				if(!$this->_url_exists($src))continue;
 				if(!$this->_is_valid_image($src))continue;
-
+				if(!$this->_is_readable_binary($src))continue;
 
 				foreach($this->json_model->get_formats() as $suffix=>$size){
 					
@@ -85,7 +91,6 @@ class Processor extends CI_Controller {
 						$img = $manager->make($src)->resize($size[0],null,function ($constraint) {$constraint->aspectRatio(); });
 					}
 					
-
 					echo 'Progress '.floor((($this->cache->file->get('progress')+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
 					$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
