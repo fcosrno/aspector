@@ -6,7 +6,7 @@ apt-get update
 apt-get install -y vim curl python-software-properties
 
 # Install PHP and others
-apt-get install -y php5 php5-sqlite php5-gd php5-curl php5-mcrypt php5-memcached php5-cli php5-imagick
+apt-get install -y php5 php5-gd php5-curl php5-cli php5-imagick
 
 # Clean up
 apt-get clean
