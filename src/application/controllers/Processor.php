@@ -39,6 +39,10 @@ class Processor extends CI_Controller {
 		curl_close($ch);
 		if($retcode=='200')return true;
 	}
+	public function _is_valid_image($url)
+	{
+		if(@exif_imagetype($url))return true;
+	}
 
 	public function run()
 	{		
@@ -55,8 +59,10 @@ class Processor extends CI_Controller {
 				$bucket = $this->config->item('aws_bucket');
 				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$source;
 
-				// If the file doesn't exist, skip to the next
+				// If the file doesn't exist or if its invalid, skip to the next
 				if(!$this->_url_exists($src))continue;
+				if(!$this->_is_valid_image($src))continue;
+
 
 				foreach($this->json_model->get_formats() as $suffix=>$size){
 					
