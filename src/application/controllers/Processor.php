@@ -8,6 +8,7 @@ class Processor extends CI_Controller {
 	private $rewrite;
 	private $format;
 	private $chunks;
+	private $debug=true;
 
 	function __construct()
 	{
@@ -24,10 +25,17 @@ class Processor extends CI_Controller {
 			$this->{$key} = $value;
 		}
 	}
+	public function get_chunks()
+	{
+		echo $this->chunks.PHP_EOL;
+	}
 	public function reset()
 	{
-		foreach(array('progress') as $var){
-			$this->cache->file->delete($var);
+		$files = glob('application/cache/*');
+		foreach($files as $file){
+			if(is_file($file) && $file!='application/cache/index.html'){
+				unlink($file);
+			}
 		}
 	}
 
@@ -52,17 +60,27 @@ class Processor extends CI_Controller {
 		if(@exif_imagetype($url))return true;
 	}
 
-	public function run()
-	{		
-		$queue = json_decode(file_get_contents('./../db/batch.json'));
+	public function run($chunk)
+	{	
+		$chunk--;
+		if($chunk>=$this->chunks)die("The chunk you requested surpasses the number of chunks defined in config.json".PHP_EOL);
+
+		$queue = json_decode(file_get_contents('./../batch.json'));
 		$queue_total = count($queue);
-		if($this->cache->file->get('progress'))$queue=array_slice($queue, $this->cache->file->get('progress'),null,true);
+
+		$chunk_length = ceil($queue_total/$this->chunks);
+		$chunk_offset = ceil($chunk_length*$chunk);
+		if(($chunk+1)==$this->chunks)$chunk_length = ceil($queue_total - $chunk_offset);
+
+		$queue = array_slice($queue, $chunk_offset,$chunk_length);
+
+		if($this->cache->file->get('progress'.$chunk))$queue=array_slice($queue, $this->cache->file->get('progress'.$chunk),null,true);
 		
 		try{
 			$manager = new ImageManager(array('driver' => 'imagick'));
 			foreach($queue as $key=>$source){
 
-				$this->cache->file->save('progress',$key,31557600);
+				$this->cache->file->save('progress'.$chunk,$key,31557600);
 
 				$bucket = $this->config->item('aws_bucket');
 				$src = 'https://s3.amazonaws.com/'.$bucket.'/'.$source;
@@ -72,13 +90,13 @@ class Processor extends CI_Controller {
 				if(!$this->_is_valid_image($src))continue;
 				if(!$this->_is_readable_binary($src))continue;
 
-				foreach($this->json_model->get_formats() as $suffix=>$size){
+				foreach($this->format as $suffix=>$size){
 					
 					$filename=$suffix.'/'.$source;
 
 					if(!$this->rewrite){
 						if($this->_url_exists('https://s3.amazonaws.com/'.$bucket.'/'.$filename)){
-							echo "File exists! Skipping ".$this->cache->file->get('progress')." of ".$queue_total.PHP_EOL;
+							echo "File exists! Skipping ".$this->cache->file->get('progress'.$chunk)." of ".$queue_total.PHP_EOL;
 							continue;
 						}
 					}
@@ -93,9 +111,9 @@ class Processor extends CI_Controller {
 						$img = $manager->make($src)->resize($size[0],null,function ($constraint) {$constraint->aspectRatio(); });
 					}
 					
-					echo 'Progress '.floor((($this->cache->file->get('progress')+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
+					echo 'Progress '.floor((($this->cache->file->get('progress'.$chunk)+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
-					$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
+					if(!$this->debug)$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
 				}
 			}
 		}catch (Exception $e){

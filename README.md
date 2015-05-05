@@ -24,27 +24,25 @@ Install dependencies
 
 ### Setup
 
-Copy db file examples and define with your stuff. Keep reading for more on these files.
+Copy config-example.json into config.json (will be gitignored) and define your stuff there. Keep reading for more on these files.
 
-	cp db/batch-example.json db/batch.json 
+	cp config-example.json config.json
 
-	cp db/format-example.json db/format.json 
-
-Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket in there. Do not edit the original example file.
+Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket in there (it will be gitignored). Do not edit the original example file.
 	
 	cp src/application/config/aws_sdk-example.php src/application/config/aws_sdk.php 
 
 ### Usage
 
-Run the following from the CLI to process every image.
+Run the included run.sh with bash to process every image.
 
-	/home/ubuntu/aspector/src/index.php processor run
+	bash /home/ubuntu/aspector/run.sh
 
 To reset, run the following after changing your batch file.
 
 	/home/ubuntu/aspector/src/index.php processor reset
 
-If something goes wrong, an error will be thrown to the terminal. You an always rerun the processor and it will continue where it left off. 
+If something goes wrong, an error will be thrown to the terminal. You can always rerun the processor and it will continue where it left off. 
 
 ### How it works
 

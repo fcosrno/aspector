@@ -1,6 +1,6 @@
 {
 	"chunks": 30,
-    "overwrite": false,
+    "rewrite": false,
     "format": {
         "thumb": [
             "60",
