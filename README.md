@@ -34,9 +34,9 @@ Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket
 
 ### Usage
 
-Run the included run.sh to process every image. You must run it from the aspector folder.
+Run `run.sh` to process every image. You must run it from the aspector folder.
 
-	cd ~/aspector.sh
+	cd ~/aspector
 	bash run.sh
 
 If you don't want to hang around to see the progress, replace the second line with this.
@@ -47,7 +47,7 @@ To reset, run the following after changing your batch file.
 
 	/home/ubuntu/aspector/src/index.php processor reset
 
-If something goes wrong, an error will be thrown to the terminal. You can always rerun the processor and it will continue where it left off. 
+If something goes wrong, an error will be thrown to the terminal. You can always rerun `run.sh` and the script will continue where it left off. 
 
 ### How it works
 
