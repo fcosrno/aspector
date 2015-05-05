@@ -8,7 +8,7 @@ class Processor extends CI_Controller {
 	private $rewrite;
 	private $format;
 	private $chunks;
-	private $debug=true;
+	private $debug=false;
 
 	function __construct()
 	{
