@@ -73,6 +73,7 @@ class Processor extends CI_Controller {
 		if(($chunk+1)==$this->chunks)$chunk_length = ceil($queue_total - $chunk_offset);
 
 		$queue = array_slice($queue, $chunk_offset,$chunk_length);
+		$chunk_total = count($queue);
 
 		if($this->cache->file->get('progress'.$chunk))$queue=array_slice($queue, $this->cache->file->get('progress'.$chunk),null,true);
 		
@@ -96,7 +97,7 @@ class Processor extends CI_Controller {
 
 					if(!$this->rewrite){
 						if($this->_url_exists('https://s3.amazonaws.com/'.$bucket.'/'.$filename)){
-							echo "File exists! Skipping ".$this->cache->file->get('progress'.$chunk)." of ".$queue_total.PHP_EOL;
+							echo "File exists! Skipping ".$this->cache->file->get('progress'.$chunk)." of ".$chunk_total.PHP_EOL;
 							continue;
 						}
 					}
@@ -111,7 +112,7 @@ class Processor extends CI_Controller {
 						$img = $manager->make($src)->resize($size[0],null,function ($constraint) {$constraint->aspectRatio(); });
 					}
 					
-					echo 'Progress '.floor((($this->cache->file->get('progress'.$chunk)+1)/$queue_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
+					echo 'Progress '.floor((($this->cache->file->get('progress'.$chunk)+1)/$chunk_total)*100).'%: https://s3.amazonaws.com/'.$bucket.'/'.$filename.PHP_EOL;
 					
 					if(!$this->debug)$this->_s3_rewrite($img->encode(null, 70),$bucket,$filename);
 				}
