@@ -34,9 +34,14 @@ Copy the aws_sdk example file and then edit it. Include your AWS keys and bucket
 
 ### Usage
 
-Run the included run.sh with bash to process every image.
+Run the included run.sh to process every image. You must run it from the aspector folder.
 
-	bash /home/ubuntu/aspector/run.sh
+	cd ~/aspector.sh
+	bash run.sh
+
+If you don't want to hang around to see the progress, replace the second line with this.
+
+	bash run.sh > /dev/null 2>&1
 
 To reset, run the following after changing your batch file.
 
