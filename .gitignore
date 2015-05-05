@@ -1,7 +1,7 @@
 vendor/
-db/data.sqlite
-db/batch.json
-db/format.json
+batch.json
+config.json
 src/application/config/aws_sdk.php
 .DS_Store
 src/application/cache/progress
+chunks

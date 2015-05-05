@@ -5,7 +5,9 @@ use Intervention\Image\ImageManager;
 
 class Processor extends CI_Controller {
 
-	private $overwrite;
+	private $rewrite;
+	private $format;
+	private $chunks;
 
 	function __construct()
 	{
@@ -74,7 +76,7 @@ class Processor extends CI_Controller {
 					
 					$filename=$suffix.'/'.$source;
 
-					if(!$this->overwrite){
+					if(!$this->rewrite){
 						if($this->_url_exists('https://s3.amazonaws.com/'.$bucket.'/'.$filename)){
 							echo "File exists! Skipping ".$this->cache->file->get('progress')." of ".$queue_total.PHP_EOL;
 							continue;

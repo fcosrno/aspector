@@ -13,17 +13,13 @@ class Json_model extends CI_Model {
         $batch = json_decode(read_file($path_to_file),TRUE);
         return $batch;
     }
-    public function get_formats()
-    {
-        return $this->_get_json('./../db/format.json');
-    }
     public function get_batch()
     {
-        return $this->_get_json('./../db/batch.json');
+        return $this->_get_json('./../batch.json');
     }
     public function get_config()
     {
-        return $this->_get_json('./../db/config.json');
+        return $this->_get_json('./../config.json');
     }
 }
 ?>
